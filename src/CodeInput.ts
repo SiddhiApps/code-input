@@ -93,6 +93,11 @@ class CodeInput implements renderable {
             return;
         }
 
+        if (e.key.length !== 1) {
+            e.preventDefault();
+            return;
+        }
+
         if (thisInputBox.textContent.length) {
             // Allow only one input
             thisInputBox.innerText = '';
@@ -101,11 +106,12 @@ class CodeInput implements renderable {
     }
 
     private _keyUpHandler: (e: KeyboardEvent) => void = (e) => {
-        let thisInputBox = e.target as HTMLElement;
-
-        if (e.key == 'Backspace' || e.key == 'Delete') {
+        if (e.key.length !== 1) {
+            e.preventDefault();
             return;
         }
+
+        let thisInputBox = e.target as HTMLElement;
 
         if (thisInputBox.textContent.length) {
             // Move to next box
