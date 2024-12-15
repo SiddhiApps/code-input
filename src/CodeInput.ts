@@ -1,5 +1,8 @@
+type AllowedInput = 'numbers' | 'alphabets' | 'alphanumeric';
+
 type CodeInputOptions = {
-    length: number
+    length: number,
+    allow?: AllowedInput
 }
 
 interface renderable {
@@ -33,7 +36,8 @@ class CodeInput implements renderable {
 
     element: HTMLElement;
     options: CodeInputOptions = {
-        length: 4
+        length: 4,
+        allow: 'numbers'
     };
 
     constructor(element: HTMLElement, options: CodeInputOptions) {
@@ -79,6 +83,16 @@ class CodeInput implements renderable {
         }
     }
 
+    private _ignoreKey: (key: string) => boolean = (key) => {
+        // Allow only printable characters
+        // Allow only specified types
+        if (key.length !== 1 || ! this._isAllowed(key)) {
+            return true;
+        }
+
+        return false;
+    }
+
     private _keyDownHandler: (e: KeyboardEvent) => void = (e) => {
         let thisInputBox = e.target as HTMLElement;
 
@@ -93,7 +107,7 @@ class CodeInput implements renderable {
             return;
         }
 
-        if (e.key.length !== 1) {
+        if (this._ignoreKey(e.key)) {
             e.preventDefault();
             return;
         }
@@ -106,7 +120,7 @@ class CodeInput implements renderable {
     }
 
     private _keyUpHandler: (e: KeyboardEvent) => void = (e) => {
-        if (e.key.length !== 1) {
+        if (this._ignoreKey(e.key)) {
             e.preventDefault();
             return;
         }
@@ -126,6 +140,24 @@ class CodeInput implements renderable {
             this.inputBoxes[i].addEventListener('keydown', this._keyDownHandler, false);
             this.inputBoxes[i].addEventListener('keyup', this._keyUpHandler, false);
         }
+    }
+
+    private _isAllowed: (key: string) => boolean = (key) => {
+        switch (this.options.allow) {
+            case "numbers":
+                return (/\d/).test(key);
+                break;
+
+            case "alphabets":
+                return (/[a-zA-Z]/).test(key);
+                break;
+
+            case "alphanumeric":
+                return (/[a-zA-Z\d]/).test(key);
+                break;
+        }
+
+        return true;
     }
 
     render: () => void = () => {
