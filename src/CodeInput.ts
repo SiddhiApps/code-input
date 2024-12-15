@@ -13,6 +13,10 @@ type Styles = {
     [key: string]: string
 }
 
+interface CallbackFunction {
+    (key?: string): void
+}
+
 const containerStyles: Styles = {
     display: 'flex',
     gap: '0.5rem'
@@ -33,6 +37,7 @@ const boxStyles: Styles = {
 class CodeInput implements renderable {
     private html: string;
     private inputBoxes: HTMLCollection;
+    private value: string = '';
 
     element: HTMLElement;
     options: CodeInputOptions = {
@@ -99,6 +104,7 @@ class CodeInput implements renderable {
         // If it is back or delete key delete the entry
         if (e.key == 'Backspace' || e.key == 'Delete') {
             thisInputBox.innerText = '';
+            this.value = this.value.slice(0, -1);
 
             // Move to previous box
             let prevInputBox = thisInputBox.previousElementSibling as HTMLInputElement;
@@ -115,6 +121,7 @@ class CodeInput implements renderable {
         if (thisInputBox.textContent.length) {
             // Allow only one input
             thisInputBox.innerText = '';
+            this.value = this.value.slice(0, -1);
             return;
         }
     }
@@ -131,6 +138,8 @@ class CodeInput implements renderable {
             // Move to next box
             let nextInputBox = thisInputBox.nextElementSibling as HTMLInputElement;
             this._moveToBox(thisInputBox, nextInputBox);
+
+            this.value += e.key;
         }
     }
 
