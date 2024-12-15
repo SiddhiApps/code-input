@@ -82,19 +82,6 @@ class CodeInput implements renderable {
     private _keyDownHandler: (e: KeyboardEvent) => void = (e) => {
         let thisInputBox = e.target as HTMLElement;
 
-        if (thisInputBox.textContent.length) {
-            // Allow only one input
-            e.preventDefault();
-            return;
-        }
-
-
-        console.log('Key down...');
-    }
-
-    private _keyUpHandler: (e: KeyboardEvent) => void = (e) => {
-        let thisInputBox = e.target as HTMLElement;
-
         // If it is back or delete key delete the entry
         if (e.key == 'Backspace' || e.key == 'Delete') {
             thisInputBox.innerText = '';
@@ -103,6 +90,20 @@ class CodeInput implements renderable {
             let prevInputBox = thisInputBox.previousElementSibling as HTMLInputElement;
             this._moveToBox(thisInputBox, prevInputBox);
 
+            return;
+        }
+
+        if (thisInputBox.textContent.length) {
+            // Allow only one input
+            thisInputBox.innerText = '';
+            return;
+        }
+    }
+
+    private _keyUpHandler: (e: KeyboardEvent) => void = (e) => {
+        let thisInputBox = e.target as HTMLElement;
+
+        if (e.key == 'Backspace' || e.key == 'Delete') {
             return;
         }
 
