@@ -2,7 +2,8 @@ type AllowedInput = 'numbers' | 'alphabets' | 'alphanumeric';
 
 type CodeInputOptions = {
     length: number,
-    allow?: AllowedInput
+    allow?: AllowedInput,
+    onComplete?: CallbackFunction
 }
 
 interface renderable {
@@ -42,7 +43,8 @@ class CodeInput implements renderable {
     element: HTMLElement;
     options: CodeInputOptions = {
         length: 4,
-        allow: 'numbers'
+        allow: 'numbers',
+        onComplete: null
     };
 
     constructor(element: HTMLElement, options: CodeInputOptions) {
@@ -134,12 +136,19 @@ class CodeInput implements renderable {
 
         let thisInputBox = e.target as HTMLElement;
 
-        if (thisInputBox.textContent.length) {
-            // Move to next box
-            let nextInputBox = thisInputBox.nextElementSibling as HTMLInputElement;
-            this._moveToBox(thisInputBox, nextInputBox);
+        if (! thisInputBox.textContent.length) {
+            return;
+        }
 
-            this.value += e.key;
+        // Move to next box
+        let nextInputBox = thisInputBox.nextElementSibling as HTMLInputElement;
+        this._moveToBox(thisInputBox, nextInputBox);
+
+        this.value += e.key;
+
+        if (this.value.length == this.options.length && this.options.onComplete !== null) {
+            // validation?
+            this.options.onComplete(this.value);
         }
     }
 
@@ -175,5 +184,10 @@ class CodeInput implements renderable {
         this.inputBoxes = this.element.querySelector('div').children;
 
         this._attachEventListeners();
+    }
+
+    // This method overrides the callback passed in the options
+    onComplete: (callback: CallbackFunction) => void = (callback) => {
+        this.options.onComplete = callback;
     }
 }
