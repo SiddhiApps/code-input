@@ -8,6 +8,8 @@ type CodeInputOptions = {
 
 interface renderable {
     render(): void,
+    isCorrect(): void,
+    isNotCorrect(): void
 }
 
 type Styles = {
@@ -18,25 +20,9 @@ interface CallbackFunction {
     (key?: string): void
 }
 
-const containerStyles: Styles = {
-    display: 'flex',
-    gap: '0.5rem'
-};
-
-const boxStyles: Styles = {
-    'width': '50px',
-    'height': '50px',
-    'border': '1px solid',
-    'border-radius': '0.5rem',
-    'display': 'inline-flex',
-    'justify-content': 'center',
-    'align-items': 'center',
-    'font-size': '2rem',
-    'caret-color': 'transparent'
-};
-
 class CodeInput implements renderable {
     private html: string;
+    private inputContainer: HTMLElement;
     private inputBoxes: HTMLCollection;
     private value: string = '';
 
@@ -54,18 +40,8 @@ class CodeInput implements renderable {
         this._generateHTMLContent();
     }
 
-    private _styleToString: (styles: Styles) => string = (styles) => {
-        let string = '';
-
-        Object.keys(styles).forEach(key => {
-            string+= key + ':' + styles[key] + ';';
-        })
-
-        return string;
-    }
-
     private _generateHTMLContent: () => void = () => {
-        this.html = `<div class="code-input" style="${this._styleToString(containerStyles)}">`;
+        this.html = `<div class="code-input">`;
 
         for (var i = 0; i < this.options.length; i++) {
             let editable = '';
@@ -73,7 +49,7 @@ class CodeInput implements renderable {
                 editable = 'contenteditable="plaintext-only"';
             }
 
-            this.html += `<div class="code-input-letter" style="${this._styleToString(boxStyles)}" ${editable}></div>`;
+            this.html += `<div class="code-input-letter" ${editable}></div>`;
         }
 
         this.html += '</div>'
@@ -111,6 +87,7 @@ class CodeInput implements renderable {
         }
 
         this.value = this.value.substring(0, inputBoxIndex);
+        this.inputContainer.classList.remove(...['is-valid', 'is-invalid']);
     }
 
     private _keyDownHandler: (e: KeyboardEvent) => void = (e) => {
@@ -202,9 +179,20 @@ class CodeInput implements renderable {
     render: () => void = () => {
         this.element.innerHTML = this.html;
 
-        this.inputBoxes = this.element.querySelector('div').children;
+        this.inputContainer = this.element.querySelector('div.code-input');
+        this.inputBoxes = this.inputContainer.children;
 
         this._attachEventListeners();
+    }
+
+    isCorrect: () => void = () => {
+        this.inputContainer.classList.remove('is-invalid');
+        this.inputContainer.classList.add('is-valid');
+    }
+
+    isNotCorrect: () => void = () => {
+        this.inputContainer.classList.remove('is-valid');
+        this.inputContainer.classList.add('is-invalid');
     }
 
     // This method overrides the callback passed in the options
